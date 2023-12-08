@@ -80,6 +80,20 @@ func runcmd(mac string) bool {
 
     // Print the output
     fmt.Println(string(stdout))
+
+    arg0 := "-e"
+    arg0 := mac
+
+    cmd := exec.Command(app, arg0)
+    stdout, err := cmd.Output()
+
+    if err != nil {
+        fmt.Println(err.Error())
+        return false
+    }
+
+    // Print the output
+    fmt.Println(string(stdout))
 	return true
 }
 
