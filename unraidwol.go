@@ -16,9 +16,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
-	"strings"
-	"time"
+	//"net"
+	//"strings"
+	//"time"
 
 	//"github.com/antchfx/xmlquery"
 	//"github.com/digitalocean/go-libvirt"
