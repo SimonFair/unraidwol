@@ -30,7 +30,7 @@ import (
 func main() {
 	var iface string                                            // Interface we'll listen on
 	var buffer = int32(1600)                                    // Buffer for packets received
-	var filter = "(udp and broadcast and (len = 102 or len = 116 or  len = 144 or len=234)) or (ether proto 0x08)" // PCAP filter to catch UDP WOL packets
+	var filter = "(udp and broadcast and (len = 102 or len = 116 or  len = 144 or len=234)) or (ether proto 0x0842)" // PCAP filter to catch UDP WOL packets
 
 	flag.StringVar(&iface, "interface", "", "Network interface name to listen on")
 	flag.Parse()
