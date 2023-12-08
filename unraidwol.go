@@ -81,11 +81,11 @@ func runcmd(mac string) bool {
     // Print the output
     fmt.Println(string(stdout))
 
-    arg0 := "-e"
-    arg0 := mac
+    app2 := "/usr/local/sbin/wol.run"   
+    arg4 := mac
 
-    cmd := exec.Command(app, arg0)
-    stdout, err := cmd.Output()
+    cmd2 := exec.Command(app2, arg4)
+    stdout2, err := cmd2.Output()
 
     if err != nil {
         fmt.Println(err.Error())
@@ -93,8 +93,8 @@ func runcmd(mac string) bool {
     }
 
     // Print the output
-    fmt.Println(string(stdout))
-	return true
+    fmt.Println(string(stdout2))
+    return true
 }
 
 // Return the first MAC address seen in the WOL packet
