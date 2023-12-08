@@ -1,4 +1,4 @@
-module github.com/scottesandiego/virtwold/v2
+module github.com/SimonFair/unraildold/v2
 
 go 1.20
 
