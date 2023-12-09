@@ -30,7 +30,7 @@ import (
 func main() {
 	var iface string                                            // Interface we'll listen on
 	var buffer = int32(1600)                                    // Buffer for packets received
-	var filter = "(udp and broadcast and (len = 102 or len = 116 or  len = 144 or len=234)) or (ether proto 0x0842)" // PCAP filter to catch UDP WOL packets
+	var filter = "ether proto 0x0842 or udp port 9" // PCAP filter to catch UDP WOL packets
 
 	flag.StringVar(&iface, "interface", "", "Network interface name to listen on")
 	flag.Parse()
@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("Unable to open device: %s", iface)
 	}
 
-	handler, err := pcap.OpenLive(iface, buffer, false, pcap.BlockForever)
+	handler, err := pcap.OpenLive(iface, buffer, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatalf("failed to open device: %v", err)
 	}
@@ -53,7 +53,7 @@ func main() {
 	source := gopacket.NewPacketSource(handler, handler.LinkType())
 	for packet := range source.Packets() {
 		// Called for each packet received
-		fmt.Printf("Received WOL packet, ")
+		fmt.Println(packet)
 		mac, err := GrabMACAddr(packet)
 		if err != nil {
 			log.Fatalf("Error with packet: %v", err)
