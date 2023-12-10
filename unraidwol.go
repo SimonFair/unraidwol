@@ -62,7 +62,16 @@ func main() {
 			// Check for Wake-on-LAN EtherType (0x0842)
 			if ethernetPacket.EthernetType == 2114 {
 				fmt.Println("Wake-on-LAN packet")
-				mac, err := GrabMACAddrEther(packet)
+							// Print Ethernet information
+			fmt.Printf("Source MAC: %s\n", ethernetPacket.SrcMAC)
+			fmt.Printf("Destination MAC: %s\n", ethernetPacket.DstMAC)
+			fmt.Printf("EtherType: %v\n", ethernetPacket.EthernetType)
+
+			// Decode the payload for EtherType 2114
+			payload := ethernetPacket.Payload
+			fmt.Printf("Payload (hex): %x\n", payload)
+				mac:= ethernetPacket.DstMAC
+				err:= nil
 			}
 		}
 
