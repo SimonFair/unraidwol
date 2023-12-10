@@ -25,6 +25,7 @@ import (
 	//"github.com/digitalocean/go-libvirt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
+	"github.com/google/gopacket/layers"
 )
 
 func main() {
@@ -52,6 +53,26 @@ func main() {
 	// Handle every packet received, looping forever
 	source := gopacket.NewPacketSource(handler, handler.LinkType())
 	for packet := range source.Packets() {
+		ethLayer := packet.Layer(layers.LayerTypeEthernet)
+		udpLayer := packet.Layer(layers.LayerTypeUDP)
+
+		if ethLayer != nil {
+			ethernetPacket, _ := ethLayer.(*layers.Ethernet)
+
+			// Check for Wake-on-LAN EtherType (0x0842)
+			if ethernetPacket.EthernetType == layers.EthernetTypeWakeOnLAN {
+				fmt.Println("Wake-on-LAN packet")
+			}
+		}
+
+		if udpLayer != nil {
+			udpPacket, _ := udpLayer.(*layers.UDP)
+
+			// Check for UDP port 9
+			if udpPacket.DstPort == layers.UDPPort(9) {
+				fmt.Println("UDP port 9 packet")
+			}
+		}
 		// Called for each packet received
 		fmt.Println(packet)
 		mac, err := GrabMACAddr(packet)
