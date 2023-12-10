@@ -62,6 +62,7 @@ func main() {
 			// Check for Wake-on-LAN EtherType (0x0842)
 			if ethernetPacket.EthernetType == layers.EthernetTypeWakeOnLAN {
 				fmt.Println("Wake-on-LAN packet")
+				mac, err := GrabMACAddrEther(packet)
 			}
 		}
 
@@ -71,11 +72,12 @@ func main() {
 			// Check for UDP port 9
 			if udpPacket.DstPort == layers.UDPPort(9) {
 				fmt.Println("UDP port 9 packet")
+				mac, err := GrabMACAddrUDP(packet)
 			}
 		}
 		// Called for each packet received
 		fmt.Println(packet)
-		mac, err := GrabMACAddr(packet)
+		//mac, err := GrabMACAddr(packet)
 		if err != nil {
 			log.Fatalf("Error with packet: %v", err)
 		}
@@ -118,8 +120,21 @@ func runcmd(mac string) bool {
     return true
 }
 
-// Return the first MAC address seen in the WOL packet
-func GrabMACAddr(packet gopacket.Packet) (string, error) {
+// Return the first MAC address seen in the Ether WOL packet
+func GrabMACAddrEther(packet gopacket.Packet) (string, error) {
+	app := packet.ApplicationLayer()
+	if app != nil {
+		payload := app.Payload()
+		fmt.Println(payload)
+		mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
+		fmt.Printf("found MAC: %s\n", mac)
+		return mac, nil
+	}
+	return "", errors.New("no MAC found in packet")
+}
+
+// Return the first MAC address seen in the UDP WOL packet
+func GrabMACAddrUDP(packet gopacket.Packet) (string, error) {
 	app := packet.ApplicationLayer()
 	if app != nil {
 		payload := app.Payload()
@@ -129,7 +144,6 @@ func GrabMACAddr(packet gopacket.Packet) (string, error) {
 	}
 	return "", errors.New("no MAC found in packet")
 }
-
 
 
 // Check if the network device exists
