@@ -60,7 +60,7 @@ func main() {
 			ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 
 			// Check for Wake-on-LAN EtherType (0x0842)
-			if ethernetPacket.EthernetType == layers.EthernetTypeWakeOnLAN {
+			if ethernetPacket.EthernetType == 2114 {
 				fmt.Println("Wake-on-LAN packet")
 				mac, err := GrabMACAddrEther(packet)
 			}
