@@ -70,8 +70,8 @@ func main() {
 			// Decode the payload for EtherType 2114
 			payload := ethernetPacket.Payload
 			fmt.Printf("Payload (hex): %x\n", payload)
-				mac:= ethernetPacket.DstMAC
-				err:= nil
+				mac := ethernetPacket.DstMAC
+				err := nil
 			}
 		}
 
