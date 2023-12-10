@@ -53,44 +53,40 @@ func main() {
 	// Handle every packet received, looping forever
 	source := gopacket.NewPacketSource(handler, handler.LinkType())
 	for packet := range source.Packets() {
-		ethLayer := packet.Layer(layers.LayerTypeEthernet)
-		udpLayer := packet.Layer(layers.LayerTypeUDP)
+			ethLayer := packet.Layer(layers.LayerTypeEthernet)
+			udpLayer := packet.Layer(layers.LayerTypeUDP)
 
-		if ethLayer != nil {
-			ethernetPacket, _ := ethLayer.(*layers.Ethernet)
+			if ethLayer != nil {
+				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 
-			// Check for Wake-on-LAN EtherType (0x0842)
-			if ethernetPacket.EthernetType == 2114 {
-				fmt.Println("Wake-on-LAN packet")
-							// Print Ethernet information
-			fmt.Printf("Source MAC: %s\n", ethernetPacket.SrcMAC)
-			fmt.Printf("Destination MAC: %s\n", ethernetPacket.DstMAC)
-			fmt.Printf("EtherType: %v\n", ethernetPacket.EthernetType)
-
-			// Decode the payload for EtherType 2114
-			payload := ethernetPacket.Payload
-			fmt.Printf("Payload (hex): %x\n", payload)
-				mac := ethernetPacket.DstMAC
-				err := nil
+				// Check for Wake-on-LAN EtherType (0x0842)
+				if ethernetPacket.EthernetType == 2114 {
+					fmt.Println("Wake-on-LAN packet")
+					dstMAC := ethernetPacket.DstMAC.String()
+					// Print Ethernet information
+					fmt.Printf("Destination MAC: %s\n", dstMAC)
+					mac :=    dstMAC
+					if err != nil {
+						log.Fatalf("Error with packet: %v", err)
+					}
+					runcmd(mac)
+				}
 			}
-		}
 
-		if udpLayer != nil {
-			udpPacket, _ := udpLayer.(*layers.UDP)
+			if udpLayer != nil {
+				udpPacket, _ := udpLayer.(*layers.UDP)
 
-			// Check for UDP port 9
-			if udpPacket.DstPort == layers.UDPPort(9) {
-				fmt.Println("UDP port 9 packet")
-				mac, err := GrabMACAddrUDP(packet)
+				// Check for UDP port 9
+				if udpPacket.DstPort == layers.UDPPort(9) {
+					fmt.Println("UDP port 9 packet")
+					mac, err := GrabMACAddrUDP(packet)
+					fmt.Println(mac,err)
+					if err != nil {
+							log.Fatalf("Error with packet: %v", err)
+					}
+					runcmd(mac)
+				}
 			}
-		}
-		// Called for each packet received
-		fmt.Println(packet)
-		//mac, err := GrabMACAddr(packet)
-		if err != nil {
-			log.Fatalf("Error with packet: %v", err)
-		}
-		runcmd(mac)
 	}
 }
 
