@@ -16,13 +16,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	//"net"
-	//"strings"
-	//"time"
 	"os/exec"
-
-	//"github.com/antchfx/xmlquery"
-	//"github.com/digitalocean/go-libvirt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/layers"
@@ -31,7 +25,9 @@ import (
 func main() {
 	var iface string                                            // Interface we'll listen on
 	var buffer = int32(1600)                                    // Buffer for packets received
-	var filter = "ether proto 0x0842 or udp port 9" // PCAP filter to catch UDP WOL packets
+	var filter = "ether proto 0x0842 or udp port 9" 			// PCAP filter to catch UDP WOL packets
+	var mac string
+	var err  error
 
 	flag.StringVar(&iface, "interface", "", "Network interface name to listen on")
 	flag.Parse()
@@ -40,7 +36,7 @@ func main() {
 		log.Fatalf("Unable to open device: %s", iface)
 	}
 
-	handler, err := pcap.OpenLive(iface, buffer, true, pcap.BlockForever)
+	handler, err := pcap.OpenLive(iface, buffer, false, pcap.BlockForever)
 	if err != nil {
 		log.Fatalf("failed to open device: %v", err)
 	}
@@ -58,84 +54,46 @@ func main() {
 
 			if ethLayer != nil {
 				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
-
 				// Check for Wake-on-LAN EtherType (0x0842)
-				if ethernetPacket.EthernetType == 2114 {
+				if ethernetPacket.EthernetType == 0x0842 {
 					fmt.Println("Wake-on-LAN packet")
 					dstMAC := ethernetPacket.DstMAC.String()
 					// Print Ethernet information
-					fmt.Printf("Destination MAC: %s\n", dstMAC)
-					mac :=    dstMAC
-					if err != nil {
-						log.Fatalf("Error with packet: %v", err)
-					}
-					runcmd(mac)
+					payload := ethernetPacket.Payload
+					//ffffffffffff5254006825ba
+					mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 				}
 			}
-
 			if udpLayer != nil {
 				udpPacket, _ := udpLayer.(*layers.UDP)
-
 				// Check for UDP port 9
 				if udpPacket.DstPort == layers.UDPPort(9) {
 					fmt.Println("UDP port 9 packet")
-					mac, err := GrabMACAddrUDP(packet)
-					fmt.Println(mac,err)
-					if err != nil {
-							log.Fatalf("Error with packet: %v", err)
-					}
-					runcmd(mac)
+					mac, err = GrabMACAddrUDP(packet)
 				}
 			}
+			if err != nil {
+				log.Fatalf("Error with packet: %v", err)
+			}
+			runcmd(mac)
 	}
 }
 
 func runcmd(mac string) bool {
-    app := "echo"
 
-    arg0 := "-e"
-    arg1 := "Hello world"
-    arg2 := "\n\tfrom"
-    arg3 := mac
+    app := "/usr/local/sbin/wol.run"   
+    arg := mac
 
-    cmd := exec.Command(app, arg0, arg1, arg2, arg3)
+    cmd := exec.Command(app, arg)
     stdout, err := cmd.Output()
 
     if err != nil {
         fmt.Println(err.Error())
         return false
     }
-
     // Print the output
     fmt.Println(string(stdout))
-
-    app2 := "/usr/local/sbin/wol.run"   
-    arg4 := mac
-
-    cmd2 := exec.Command(app2, arg4)
-    stdout2, err := cmd2.Output()
-
-    if err != nil {
-        fmt.Println(err.Error())
-        return false
-    }
-
-    // Print the output
-    fmt.Println(string(stdout2))
     return true
-}
-
-// Return the first MAC address seen in the Ether WOL packet
-func GrabMACAddrEther(packet gopacket.Packet) (string, error) {
-	app := packet.ApplicationLayer()
-	if app != nil {
-		payload := app.Payload()
-		fmt.Println(payload)
-		mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
-		fmt.Printf("found MAC: %s\n", mac)
-		return mac, nil
-	}
-	return "", errors.New("no MAC found in packet")
 }
 
 // Return the first MAC address seen in the UDP WOL packet
@@ -149,7 +107,6 @@ func GrabMACAddrUDP(packet gopacket.Packet) (string, error) {
 	}
 	return "", errors.New("no MAC found in packet")
 }
-
 
 // Check if the network device exists
 func deviceExists(interfacename string) bool {
