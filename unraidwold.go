@@ -15,87 +15,83 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
-	"os/exec"
-	"os"
-	"os/signal"
-	"syscall"
+	package main
+
+	import (
+		"fmt"
+		"log"
+		"os"
+		"os/exec"
+		"os/signal"
+		"syscall"
 	
-	"github.com/google/gopacket"
-	"github.com/google/gopacket/pcap"
-	"github.com/google/gopacket/layers"
-	"github.com/urfave/cli/v2"
-)
-
-func main() {
-	app := &cli.App{
-		Name:  "PacketDaemon",
-		Usage: "Capture and process network packets",
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "daemon",
-				Usage: "Run as a daemon",
+		"github.com/google/gopacket"
+		"github.com/google/gopacket/pcap"
+		"github.com/google/gopacket/layers"
+		"github.com/urfave/cli/v2"
+	)
+	
+	func main() {
+		app := &cli.App{
+			Name:  "PacketDaemon",
+			Usage: "Capture and process network packets",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:  "daemon",
+					Usage: "Run as a daemon",
+				},
+				&cli.StringFlag{
+					Name:  "interface",
+					Usage: "Network interface name",
+				},
 			},
-			&cli.StringFlag{
-				Name:  "interface",
-				Usage: "Network interface name",
+			Action: func(c *cli.Context) error {
+				if c.Bool("daemon") {
+					// Run as a new process (daemon)
+					return runAsDaemon(c.String("interface"))
+				}
+	
+				// Run as a regular program
+				return runRegular(c.String("interface"))
 			},
-		},
-		Action: func(c *cli.Context) error {
-			if c.Bool("daemon") {
-				// Run as a daemon
-				return runAsDaemon(c.String("interface"))
-			}
-
-			// Run as a regular program
-			return runRegular(c.String("interface"))
-		},
+		}
+	
+		err := app.Run(os.Args)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-
-	err := app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
+	
+	func runRegular(interfaceName string) error {
+		handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
+		if err != nil {
+			return err
+		}
+		defer handle.Close()
+	
+		return processPackets(handle)
 	}
-}
-
-func runRegular(interfaceName string) error {
-	handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
-	if err != nil {
-		return err
+	
+	func runAsDaemon(interfaceName string) error {
+		// Build the command to run the program as a daemon
+		cmd := exec.Command(os.Args[0], "--daemon=false", "--interface="+interfaceName)
+	
+		// Start the new process in the background
+		err := cmd.Start()
+		if err != nil {
+			return err
+		}
+	
+		// Detach the child process from the parent process
+		err = cmd.Process.Release()
+		if err != nil {
+			return err
+		}
+	
+		fmt.Printf("Daemon started with PID %d\n", cmd.Process.Pid)
+		return nil
 	}
-	defer handle.Close()
-
-	return processPackets(handle)
-}
-
-func runAsDaemon(interfaceName string) error {
-	// Setup signal handling for clean shutdown
-	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
-
-	// Open the pcap handle
-	handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
-	if err != nil {
-		return err
-	}
-	defer handle.Close()
-
-	// Set the BPF filter to capture only EtherType 2114 (Raw/Experimental)
-	filter := "ether proto 2114"
-	err = handle.SetBPFFilter(filter)
-	if err != nil {
-		return err
-	}
-
-	// Start processing packets in a separate goroutine
-	go processPackets(handle)
-
-	// Wait for a termination signal
-	<-stopChan
-	fmt.Println("Received termination signal. Exiting.")
-	return nil
-}
-
+	
 func processPackets(handle *pcap.Handle) error {
 	// Start processing packets
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
