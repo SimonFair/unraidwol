@@ -32,6 +32,7 @@ import (
 
 	var logger *log.Logger
 	var logOutput io.Writer
+	var file string
 	
 	func main() {
 		app := &cli.App{
@@ -49,7 +50,7 @@ import (
 			},
 			Action: func(c *cli.Context) error {
 				// Set up logging
-				logFile := c.String("log")
+				logFile = c.String("log")
 				
 				setupLogging(logFile)
 	
@@ -73,7 +74,6 @@ import (
 				fmt.Println(err)
 			}
 			defer file.Close()
-		file.WriteString("Test")
 
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
