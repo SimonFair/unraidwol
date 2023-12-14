@@ -92,7 +92,7 @@ import (
 		return nil
 	}
 	
-func processPackets(handle *pcap.Handle) error {
+func processPackets(handle *pcap.Handle)  {
 	// Start processing packets
 // Handle every packet received, looping forever
 var mac string
@@ -125,7 +125,7 @@ for packet := range source.Packets() {
 		}
 		runcmd(mac)
 }
-return error
+return 
 }
 
 
