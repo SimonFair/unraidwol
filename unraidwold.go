@@ -21,8 +21,8 @@ import (
 		"log/syslog"
 		"os"
 		"os/exec"
-		"os/signal"
-		"syscall"
+	//	"os/signal"
+	//	"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
