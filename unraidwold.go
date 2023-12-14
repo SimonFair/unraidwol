@@ -98,6 +98,7 @@ import (
 			return err
 		}
 		defer removePIDFile(pidFile)
+		fmt.Printf("Starting")
 		logger.Println("Processing WOL Requests.")
 
 		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
