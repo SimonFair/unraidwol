@@ -21,8 +21,8 @@ import (
 		"log/syslog"
 		"os"
 		"os/exec"
-		"os/signal"
-		"syscall"
+		//"os/signal"
+		//"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
@@ -87,8 +87,7 @@ import (
 	
 	
 	func runRegular(interfaceName string) error {
-		stopChan := make(chan os.Signal, 1)
-		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
+
 
 		var filter = "ether proto 0x0842 or udp port 9" 
 
@@ -112,9 +111,7 @@ import (
 	
 		return processPackets(handle)
 
-		<-stopChan
-		logger.Println("Received termination signal. Exiting.")
-		return nil
+
 	}
 	
 
@@ -135,7 +132,6 @@ import (
 	func processPackets(handle *pcap.Handle) error {
 		var mac string
 		var err error
-		stopChan := make(chan os.Signal, 1)
 		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
@@ -168,9 +164,6 @@ import (
 		}
 		return nil
 
-		<-stopChan
-		logger.Println("Received termination signal. Exiting.")
-		return nil
 	}
 
 
