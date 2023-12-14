@@ -125,7 +125,7 @@ for packet := range source.Packets() {
 		}
 		runcmd(mac)
 }
-return 
+return error
 }
 
 
