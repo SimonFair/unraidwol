@@ -145,18 +145,18 @@ import (
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
-					// Detach the child process from the parent process
-					err = cmd.Process.Release()
-					if err != nil {
-						return err
-					}
-					
+
+
 		err = cmd.Start()
 		if err != nil {
 			return err
 		}
 
-
+					// Detach the child process from the parent process
+					err = cmd.Process.Release()
+					if err != nil {
+						return err
+					}
 	
 		go processPackets(handle)
 	
