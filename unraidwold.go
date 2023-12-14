@@ -116,7 +116,7 @@ import (
 				}
 			}
 			if err := runcmd(mac); err != nil {
-				return err
+				return nil
 			}
 		
 		return nil
