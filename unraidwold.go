@@ -92,42 +92,41 @@ import (
 		return nil
 	}
 	
-func processPackets(handle *pcap.Handle)  {
-	// Start processing packets
-// Handle every packet received, looping forever
-var mac string
-var err  error
-source := gopacket.NewPacketSource(handle, handle.LinkType())
-for packet := range source.Packets() {
-		ethLayer := packet.Layer(layers.LayerTypeEthernet)
-		udpLayer := packet.Layer(layers.LayerTypeUDP)
-
-		if ethLayer != nil {
-			ethernetPacket, _ := ethLayer.(*layers.Ethernet)
-			// Check for Wake-on-LAN EtherType (0x0842)
-			if ethernetPacket.EthernetType == 0x0842 {
-				fmt.Println("Wake-on-LAN packet")
-				payload := ethernetPacket.Payload
-				//ffffffffffff5254006825ba
-				mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
+	func processPackets(handle *pcap.Handle) {
+		var mac string
+	
+		source := gopacket.NewPacketSource(handle, handle.LinkType())
+		for packet := range source.Packets() {
+			ethLayer := packet.Layer(layers.LayerTypeEthernet)
+			udpLayer := packet.Layer(layers.LayerTypeUDP)
+	
+			if ethLayer != nil {
+				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
+				if ethernetPacket.EthernetType == 0x0842 {
+					fmt.Println("Wake-on-LAN packet")
+					mac = extractMACFromPayload(ethernetPacket.Payload)
+				}
 			}
-		}
-		if udpLayer != nil {
-			udpPacket, _ := udpLayer.(*layers.UDP)
-			// Check for UDP port 9
-			if udpPacket.DstPort == layers.UDPPort(9) {
-				fmt.Println("UDP port 9 packet")
-				mac, err = GrabMACAddrUDP(packet)
+	
+			if udpLayer != nil {
+				udpPacket, _ := udpLayer.(*layers.UDP)
+				if udpPacket.DstPort == layers.UDPPort(9) {
+					fmt.Println("UDP port 9 packet")
+					mac = extractMACFromPayload(packet.Data())
+				}
 			}
+	
+			runcmd(mac)
 		}
-		if err != nil {
-			log.Fatalf("Error with packet: %v", err)
-		}
-		runcmd(mac)
-}
-return 
-}
+	}
 
+	func extractMACFromPayload(payload []byte) string {
+		// Assuming payload structure for Wake-on-LAN or UDP packet
+		if len(payload) >= 12 {
+			return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
+		}
+		return ""
+	}
 
 
 func runcmd(mac string) bool {
