@@ -149,6 +149,12 @@ import (
 		if err != nil {
 			return err
 		}
+
+				// Detach the child process from the parent process
+				err = cmd.Process.Release()
+				if err != nil {
+					return err
+				}
 	
 		go processPackets(handle)
 	
