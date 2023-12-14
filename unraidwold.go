@@ -156,6 +156,19 @@ import (
 		logger.Println("Received termination signal. Exiting.")
 		return nil
 	}
+
+	func writePIDFile(pidFile string) error {
+		pid := os.Getpid()
+		pidStr := fmt.Sprintf("%d\n", pid)
+		return ioutil.WriteFile(pidFile, []byte(pidStr), 0644)
+	}
+	
+	func removePIDFile(pidFile string) {
+		err := os.Remove(pidFile)
+		if err != nil {
+			logger.Printf("Error removing PID file: %v\n", err)
+		}
+	}
 	
 	
 	func processPackets(handle *pcap.Handle) error {
