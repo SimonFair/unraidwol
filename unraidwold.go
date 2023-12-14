@@ -115,11 +115,8 @@ import (
 					mac = extractMACFromPayload(packet.Data())
 				}
 			}
-			if err := runcmd(mac); err != true {
-				return nil
-			}
+			runcmd(mac)
 		
-		return nil
 		
 		}
 		return nil
