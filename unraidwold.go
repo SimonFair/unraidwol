@@ -63,7 +63,7 @@ import (
 
 	func setupLogging(logFile string) {
 		var logOutput io.Writer
-	
+		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
 			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -74,7 +74,7 @@ import (
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
 			// If no log file is specified, log to syslog
-			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "PacketDaemon")
+			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "UNraidwold")
 			if err != nil {
 				logger.Fatal(err)
 			}
