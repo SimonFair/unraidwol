@@ -49,7 +49,7 @@ import (
 			Action: func(c *cli.Context) error {
 				// Set up logging
 				logFile := c.String("log")
-				logFile := "/tmp/test"
+				logFile = "/tmp/test"
 				setupLogging(logFile)
 	
 				return runRegular(c.String("interface"))
