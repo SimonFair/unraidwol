@@ -68,7 +68,7 @@ import (
 			// If a log file is specified, create or append to the file
 			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
-				logger.Fatal(err)
+				fmt.Println(err)
 			}
 			defer file.Close()
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
