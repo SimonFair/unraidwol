@@ -49,6 +49,7 @@ import (
 			Action: func(c *cli.Context) error {
 				// Set up logging
 				logFile := c.String("log")
+				logFile := "/tmp/test"
 				setupLogging(logFile)
 	
 				return runRegular(c.String("interface"))
@@ -63,7 +64,6 @@ import (
 
 	func setupLogging(logFile string) {
 		var logOutput io.Writer
-		logFile = "/tmp/log"
 		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
