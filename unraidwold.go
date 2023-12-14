@@ -15,17 +15,22 @@ import (
 	"errors"
 	"flag"
 		"fmt"
+		"io"
+		"io/ioutil"
 		"log"
+		"log/syslog"
 		"os"
 		"os/exec"
-	//	"os/signal"
-	//	"syscall"
+		"os/signal"
+		"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
 		"github.com/google/gopacket/layers"
 		"github.com/urfave/cli/v2"
 	)
+
+	var logger *log.Logger
 	
 	func main() {
 		app := &cli.App{
@@ -40,23 +45,53 @@ import (
 					Name:  "interface",
 					Usage: "Network interface name",
 				},
+				&cli.StringFlag{
+					Name:  "log",
+					Usage: "Log file path",
+				},
 			},
 			Action: func(c *cli.Context) error {
+				// Set up logging
+				logFile := c.String("log")
+				setupLogging(logFile)
+	
 				if c.Bool("daemon") {
-					// Run as a new process (daemon)
 					return runAsDaemon(c.String("interface"))
 				}
-	
-				// Run as a regular program
 				return runRegular(c.String("interface"))
 			},
 		}
 	
 		err := app.Run(os.Args)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}
+
+	func setupLogging(logFile string) {
+		var logOutput io.Writer
+	
+		if logFile != "" {
+			// If a log file is specified, create or append to the file
+			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			if err != nil {
+				logger.Fatal(err)
+			}
+			defer file.Close()
+			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
+		} else {
+			// If no log file is specified, log to syslog
+			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "PacketDaemon")
+			if err != nil {
+				logger.Fatal(err)
+			}
+			logOutput = syslogWriter
+		}
+	
+		// Create a logger that writes to the specified output
+		logger = log.New(logOutput, "", log.LstdFlags)
+	}
+	
 	
 	func runRegular(interfaceName string) error {
 		var filter = "ether proto 0x0842 or udp port 9" 
@@ -72,23 +107,31 @@ import (
 		return processPackets(handle)
 	}
 	
+
 	func runAsDaemon(interfaceName string) error {
-		// Build the command to run the program as a daemon
-		cmd := exec.Command(os.Args[0], "--daemon=false", "--interface="+interfaceName)
+		stopChan := make(chan os.Signal, 1)
+		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 	
-		// Start the new process in the background
-		err := cmd.Start()
+		handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
+		if err != nil {
+			return err
+		}
+		defer handle.Close()
+	
+		filter := "ether proto 0x0842 or udp port 9"
+		err = handle.SetBPFFilter(filter)
 		if err != nil {
 			return err
 		}
 	
-		// Detach the child process from the parent process
-		err = cmd.Process.Release()
-		if err != nil {
-			return err
-		}
+		// Get the current process ID (PID)
+		pid := os.Getpid()
+		logger.Printf("Daemon started with PID %d\n", pid)
 	
-		fmt.Printf("Daemon started with PID %d\n", cmd.Process.Pid)
+		go processPackets(handle)
+	
+		<-stopChan
+		logger.Println("Received termination signal. Exiting.")
 		return nil
 	}
 	
