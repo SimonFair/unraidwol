@@ -87,7 +87,7 @@ import (
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
 		
-		logOutput = io.MultiWriter(file, os.Stdout)
+		
 		logOutput.Write([]byte("Mult Test"))
 		logger.Println("Processing WOL Requests.")
 
