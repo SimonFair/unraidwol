@@ -115,7 +115,9 @@ import (
 				if udpPacket.DstPort == layers.UDPPort(9) {
 					fmt.Println("UDP port 9 packet")
 					mac, err = GrabMACAddrUDP(packet)
-					if (err != nil) fmt.Printf("Error")
+					if (err != nil) {
+						fmt.Printf("Error")
+					}
 				}
 			}
 			runcmd(mac)
