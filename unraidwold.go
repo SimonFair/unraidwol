@@ -165,6 +165,10 @@ import (
 		
 		}
 		return nil
+
+		<-stopChan
+		logger.Println("Received termination signal. Exiting.")
+		return nil
 	}
 
 
