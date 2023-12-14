@@ -94,7 +94,7 @@ import (
 	
 	func processPackets(handle *pcap.Handle) error {
 		var mac string
-		var err bool
+		var err error
 	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
 		for packet := range source.Packets() {
@@ -105,6 +105,7 @@ import (
 				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 				if ethernetPacket.EthernetType == 0x0842 {
 					fmt.Println("Wake-on-LAN packet")
+					payload := ethernetPacket.Payload
 					mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 				}
 			}
