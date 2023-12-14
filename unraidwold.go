@@ -135,6 +135,8 @@ import (
 	func processPackets(handle *pcap.Handle) error {
 		var mac string
 		var err error
+		stopChan := make(chan os.Signal, 1)
+		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
 		for packet := range source.Packets() {
