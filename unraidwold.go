@@ -99,6 +99,7 @@ import (
 			return err
 		}
 		defer removePIDFile(pidFile)
+		logger.Println("Processing WOL Requests.")
 
 		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
 		if err != nil {
@@ -143,7 +144,7 @@ import (
 			if ethLayer != nil {
 				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 				if ethernetPacket.EthernetType == 0x0842 {
-					fmt.Println("Wake-on-LAN packet")
+					logger.Println("Wake-on-LAN packet")
 					payload := ethernetPacket.Payload
 					mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 				}
@@ -177,7 +178,7 @@ func runcmd(mac string) bool {
         return false
     }
     // Print the output
-    fmt.Println(string(stdout))
+    logger.Println(string(stdout))
     return true
 }
 
@@ -187,7 +188,7 @@ func GrabMACAddrUDP(packet gopacket.Packet) (string, error) {
 	if app != nil {
 		payload := app.Payload()
 		mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
-		fmt.Printf("found MAC: %s\n", mac)
+		//fmt.Printf("found MAC: %s\n", mac)
 		return mac, nil
 	}
 	return "", errors.New("no MAC found in packet")
