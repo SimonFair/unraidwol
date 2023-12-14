@@ -122,6 +122,7 @@ import (
 		return nil
 		
 		}
+		return nil
 	}
 
 	func extractMACFromPayload(payload []byte) string {
