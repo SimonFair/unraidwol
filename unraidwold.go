@@ -72,6 +72,8 @@ import (
 				fmt.Println(err)
 			}
 			defer file.Close()
+		file.WriteString("Test")
+
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
 			// If no log file is specified, log to syslog
@@ -85,7 +87,6 @@ import (
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
 		
-		file.WriteString("Test")
 		logOutput = io.MultiWriter(file, os.Stdout)
 		logOutput.Write([]byte("Mult Test"))
 		logger.Println("Processing WOL Requests.")
