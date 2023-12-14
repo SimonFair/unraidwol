@@ -37,10 +37,6 @@ import (
 			Name:  "unraidwold",
 			Usage: "Capture and process WOL Network packages",
 			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:  "daemon",
-					Usage: "Run as a daemon",
-				},
 				&cli.StringFlag{
 					Name:  "interface",
 					Usage: "Network interface name",
@@ -55,9 +51,6 @@ import (
 				logFile := c.String("log")
 				setupLogging(logFile)
 	
-				if c.Bool("daemon") {
-					return runAsDaemon(c.String("interface"))
-				}
 				return runRegular(c.String("interface"))
 			},
 		}
@@ -107,63 +100,6 @@ import (
 		return processPackets(handle)
 	}
 	
-
-	func runAsDaemon(interfaceName string) error {
-		stopChan := make(chan os.Signal, 1)
-		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
-	
-		// Create a PID file
-		pidFile := "/var/run/packetdaemon.pid" // Change the path as needed
-		err := writePIDFile(pidFile)
-		if err != nil {
-			return err
-		}
-		defer removePIDFile(pidFile)
-	
-		handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
-		if err != nil {
-			return err
-		}
-		defer handle.Close()
-	
-		filter := "ether proto 0x0842 or udp port 9"
-		err = handle.SetBPFFilter(filter)
-		if err != nil {
-			return err
-		}
-	
-		// Get the current process ID (PID)
-		pid := os.Getpid()
-		logger.Printf("Daemon started with PID %d\n", pid)
-	
-		// Detach from the parent process
-		sysProcAttr := &syscall.SysProcAttr{
-			Setsid: true,
-		}
-		cmd := exec.Command(os.Args[0], "--daemon=false", "--interface="+interfaceName)
-		cmd.SysProcAttr = sysProcAttr
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-
-
-		err = cmd.Start()
-		if err != nil {
-			return err
-		}
-
-					// Detach the child process from the parent process
-					err = cmd.Process.Release()
-					if err != nil {
-						return err
-					}
-	
-		//go processPackets(handle)
-	
-		<-stopChan
-		logger.Println("Received termination signal. Exiting.")
-		return nil
-	}
 
 	func writePIDFile(pidFile string) error {
 		pid := os.Getpid()
