@@ -14,10 +14,6 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
-	package main
-
-	import (
 		"fmt"
 		"log"
 		"os"
