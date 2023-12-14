@@ -158,7 +158,7 @@ import (
 						return err
 					}
 	
-		go processPackets(handle)
+		//go processPackets(handle)
 	
 		<-stopChan
 		logger.Println("Received termination signal. Exiting.")
