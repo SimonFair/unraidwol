@@ -31,6 +31,7 @@ import (
 	)
 
 	var logger *log.Logger
+	var logOutput io.Writer
 	
 	func main() {
 		app := &cli.App{
@@ -63,7 +64,7 @@ import (
 	}
 
 	func setupLogging(logFile string) {
-		var logOutput io.Writer
+	
 		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
@@ -86,10 +87,7 @@ import (
 	
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
-		
-		
-		logOutput.Write([]byte("Mult Test"))
-		logger.Println("Processing WOL Requests.")
+	
 
 
 	}
