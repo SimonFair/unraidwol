@@ -19,7 +19,7 @@ import (
 		"os"
 		"os/exec"
 	//	"os/signal"
-		"syscall"
+	//	"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
@@ -64,7 +64,7 @@ import (
 		if err != nil {
 			return err
 		}
-		if err := handler.SetBPFFilter(filter); err != nil {
+		if err := handle.SetBPFFilter(filter); err != nil {
 			log.Fatalf("Something in the BPF went wrong!: %v", err)
 		}
 		defer handle.Close()
@@ -125,6 +125,7 @@ for packet := range source.Packets() {
 		}
 		runcmd(mac)
 }
+return true
 }
 
 
