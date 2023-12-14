@@ -21,7 +21,7 @@ import (
 		"log/syslog"
 		"os"
 		"os/exec"
-	//	"os/signal"
+		"os/signal"
 	//	"syscall"
 	
 		"github.com/google/gopacket"
@@ -87,7 +87,19 @@ import (
 	
 	
 	func runRegular(interfaceName string) error {
+		stopChan := make(chan os.Signal, 1)
+		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
+
 		var filter = "ether proto 0x0842 or udp port 9" 
+
+		// Create a PID file
+		pidFile := "/var/run/unraidwold.pid" // Change the path as needed
+		err := writePIDFile(pidFile)
+		if err != nil {
+			return err
+		}
+		defer removePIDFile(pidFile)
+
 		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
 		if err != nil {
 			return err
@@ -98,6 +110,10 @@ import (
 		defer handle.Close()
 	
 		return processPackets(handle)
+
+		<-stopChan
+		logger.Println("Received termination signal. Exiting.")
+		return nil
 	}
 	
 
