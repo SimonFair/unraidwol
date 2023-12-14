@@ -18,7 +18,7 @@ import (
 		"log"
 		"os"
 		"os/exec"
-		"os/signal"
+	//	"os/signal"
 		"syscall"
 	
 		"github.com/google/gopacket"
@@ -95,7 +95,9 @@ import (
 func processPackets(handle *pcap.Handle) error {
 	// Start processing packets
 // Handle every packet received, looping forever
-source := gopacket.NewPacketSource(handler, handler.LinkType())
+var mac string
+var err  error
+source := gopacket.NewPacketSource(handle, handle.LinkType())
 for packet := range source.Packets() {
 		ethLayer := packet.Layer(layers.LayerTypeEthernet)
 		udpLayer := packet.Layer(layers.LayerTypeUDP)
