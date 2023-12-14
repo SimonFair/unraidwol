@@ -112,6 +112,14 @@ import (
 		stopChan := make(chan os.Signal, 1)
 		signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 	
+		// Create a PID file
+		pidFile := "/var/run/packetdaemon.pid" // Change the path as needed
+		err := writePIDFile(pidFile)
+		if err != nil {
+			return err
+		}
+		defer removePIDFile(pidFile)
+	
 		handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
 		if err != nil {
 			return err
@@ -128,12 +136,27 @@ import (
 		pid := os.Getpid()
 		logger.Printf("Daemon started with PID %d\n", pid)
 	
+		// Detach from the parent process
+		sysProcAttr := &syscall.SysProcAttr{
+			Setsid: true,
+		}
+		cmd := exec.Command(os.Args[0], "--daemon=false", "--interface="+interfaceName)
+		cmd.SysProcAttr = sysProcAttr
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+	
 		go processPackets(handle)
 	
 		<-stopChan
 		logger.Println("Received termination signal. Exiting.")
 		return nil
 	}
+	
 	
 	func processPackets(handle *pcap.Handle) error {
 		var mac string
