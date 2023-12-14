@@ -16,7 +16,7 @@ import (
 	"flag"
 		"fmt"
 		"io"
-		"io/ioutil"
+		//"io/ioutil"
 		"log"
 		"log/syslog"
 		"os"
