@@ -59,9 +59,13 @@ import (
 	}
 	
 	func runRegular(interfaceName string) error {
-		handle, err := pcap.OpenLive(interfaceName, 1600, true, pcap.BlockForever)
+		var filter = "ether proto 0x0842 or udp port 9" 
+		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
 		if err != nil {
 			return err
+		}
+		if err := handler.SetBPFFilter(filter); err != nil {
+			log.Fatalf("Something in the BPF went wrong!: %v", err)
 		}
 		defer handle.Close()
 	
@@ -90,45 +94,38 @@ import (
 	
 func processPackets(handle *pcap.Handle) error {
 	// Start processing packets
-	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-	for {
-		select {
-		case packet, ok := <-packetSource.Packets():
-			if !ok {
-				fmt.Println("Packet source closed. Exiting.")
-				return nil
+// Handle every packet received, looping forever
+source := gopacket.NewPacketSource(handler, handler.LinkType())
+for packet := range source.Packets() {
+		ethLayer := packet.Layer(layers.LayerTypeEthernet)
+		udpLayer := packet.Layer(layers.LayerTypeUDP)
+
+		if ethLayer != nil {
+			ethernetPacket, _ := ethLayer.(*layers.Ethernet)
+			// Check for Wake-on-LAN EtherType (0x0842)
+			if ethernetPacket.EthernetType == 0x0842 {
+				fmt.Println("Wake-on-LAN packet")
+				payload := ethernetPacket.Payload
+				//ffffffffffff5254006825ba
+				mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 			}
-
-			// Decode and process the packet
-			processPacket(packet)
 		}
-	}
+		if udpLayer != nil {
+			udpPacket, _ := udpLayer.(*layers.UDP)
+			// Check for UDP port 9
+			if udpPacket.DstPort == layers.UDPPort(9) {
+				fmt.Println("UDP port 9 packet")
+				mac, err = GrabMACAddrUDP(packet)
+			}
+		}
+		if err != nil {
+			log.Fatalf("Error with packet: %v", err)
+		}
+		runcmd(mac)
+}
 }
 
-func processPacket(packet gopacket.Packet) {
-	// Decode the Ethernet layer
-	ethLayer := packet.Layer(layers.LayerTypeEthernet)
-	if ethLayer != nil {
-		ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 
-		// Convert MAC addresses to string
-		srcMAC := ethernetPacket.SrcMAC.String()
-		dstMAC := ethernetPacket.DstMAC.String()
-
-		// Print Ethernet information
-		fmt.Printf("Source MAC: %s\n", srcMAC)
-		fmt.Printf("Destination MAC: %s\n", dstMAC)
-		fmt.Printf("EtherType: %v\n", ethernetPacket.EthernetType)
-
-		// Decode the payload for EtherType 2114
-		payload := ethernetPacket.Payload
-		fmt.Printf("Payload (hex): %x\n", payload)
-
-		// Convert payload to string and print (assuming it's ASCII text)
-		payloadString := string(payload)
-		fmt.Printf("Payload (string): %s\n", payloadString)
-	}
-}
 
 func runcmd(mac string) bool {
     app := "/usr/local/sbin/wol.run"   
