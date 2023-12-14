@@ -135,7 +135,7 @@ import (
 
 
 func runcmd(mac string) bool {
-    app := "/usr/local/sbin/wol.run"   
+    app := "/usr/local/emhttp/plugins/dynamix/include/WOLrun.php"   
     arg := mac
     cmd := exec.Command(app, arg)
     stdout, err := cmd.Output()
