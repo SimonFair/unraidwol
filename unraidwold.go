@@ -22,7 +22,7 @@ import (
 		"os"
 		"os/exec"
 		"os/signal"
-	//	"syscall"
+		"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
