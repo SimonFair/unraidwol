@@ -92,7 +92,7 @@ import (
 		return nil
 	}
 	
-	func processPackets(handle *pcap.Handle) {
+	func processPackets(handle *pcap.Handle) error {
 		var mac string
 	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
@@ -115,8 +115,12 @@ import (
 					mac = extractMACFromPayload(packet.Data())
 				}
 			}
-	
-			runcmd(mac)
+			if err := runcmd(mac); err != nil {
+				return err
+			}
+		
+		return nil
+		
 		}
 	}
 
