@@ -112,7 +112,7 @@ import (
 				udpPacket, _ := udpLayer.(*layers.UDP)
 				if udpPacket.DstPort == layers.UDPPort(9) {
 					fmt.Println("UDP port 9 packet")
-					mac = extractMACFromPayload(packet.Data())
+					mac, err = GrabMACAddrUDP(packet)
 				}
 			}
 			runcmd(mac)
@@ -120,14 +120,6 @@ import (
 		
 		}
 		return nil
-	}
-
-	func extractMACFromPayload(payload []byte) string {
-		// Assuming payload structure for Wake-on-LAN or UDP packet
-		if len(payload) >= 12 {
-			return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
-		}
-		return ""
 	}
 
 
