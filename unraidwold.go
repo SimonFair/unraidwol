@@ -150,42 +150,43 @@ import (
 	
 	func processPackets(handle *pcap.Handle, signalChan chan os.Signal, doneChan chan bool) error {
 		var mac string
-	
+
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
-		for packet := range source.Packets() {
-			ethLayer := packet.Layer(layers.LayerTypeEthernet)
-			udpLayer := packet.Layer(layers.LayerTypeUDP)
+		for {
+			select {
+			case packet := <-source.Packets():
+				ethLayer := packet.Layer(layers.LayerTypeEthernet)
+				udpLayer := packet.Layer(layers.LayerTypeUDP)
 	
-			if ethLayer != nil {
-				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
-				if ethernetPacket.EthernetType == 0x0842 {
-					//logger.Println("Wake-on-LAN packet")
-					payload := ethernetPacket.Payload
-					mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
-				}
-			}
-	
-			if udpLayer != nil {
-				udpPacket, _ := udpLayer.(*layers.UDP)
-				if udpPacket.DstPort == layers.UDPPort(9) {
-					//fmt.Println("UDP port 9 packet")
-					appPacket := packet.ApplicationLayer()
-					if appPacket != nil {
-						payload := appPacket.Payload()
-						mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
+				if ethLayer != nil {
+					ethernetPacket, _ := ethLayer.(*layers.Ethernet)
+					if ethernetPacket.EthernetType == 0x0842 {
+						payload := ethernetPacket.Payload
+						mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 					}
-					//mac, err = GrabMACAddrUDP(packet)
-					//if (err != nil) {
-					//	fmt.Printf("Error")
-					//}
 				}
+	
+				if udpLayer != nil {
+					udpPacket, _ := udpLayer.(*layers.UDP)
+					if udpPacket.DstPort == layers.UDPPort(9) {
+						appPacket := packet.ApplicationLayer()
+						if appPacket != nil {
+							payload := appPacket.Payload()
+							mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
+						}
+					}
+				}
+	
+				go runcmd(mac)
+	
+			case sig := <-signalChan:
+				fmt.Printf("Received signal: %v\n", sig)
+				doneChan <- true
+				return nil
 			}
-			runcmd(mac)
 		}
-		return nil
-
 	}
-
+	
 
 func runcmd(mac string) bool {
     app := "/usr/local/emhttp/plugins/dynamix/include/WOLrun.php"   
