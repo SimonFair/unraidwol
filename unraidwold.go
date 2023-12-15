@@ -182,6 +182,7 @@ import (
 				go runcmd(mac)
 	
 			case sig := <-signalChan:
+				fmt.Printf("Received signal: %v\n", sig)
 				doneChan <- true
 				return nil
 			}
