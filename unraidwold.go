@@ -42,6 +42,7 @@ import (
 				&cli.StringFlag{
 					Name:  "interface",
 					Usage: "Network interface name",
+					Required: true,
 				},
 				&cli.StringFlag{
 					Name:  "log",
