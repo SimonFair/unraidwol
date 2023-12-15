@@ -64,7 +64,7 @@ import (
 		}
 
 		deviceError := deviceExists(interfaceName)
-		if deviceError {
+		if (! deviceError) {
 			flag.PrintDefaults()
 			os.Exit(1)
 		}
