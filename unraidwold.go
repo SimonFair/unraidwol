@@ -97,8 +97,7 @@ import (
 	
 		// Check if promiscuous mode is enabled
 		if promiscuous {
-			fmt.Println("Promiscuous mode is enabled")
-			// Additional actions for promiscuous mode can be added here
+			logger.Println("Promiscuous mode is enabled")
 		}
 	
 		var filter = "ether proto 0x0842 or udp port 9" 
@@ -109,11 +108,9 @@ import (
 		if err != nil {
 			logger.Fatal(err)
 		}
-		defer removePIDFile(pidFile)
-		fmt.Printf("Starting")
 		logger.Println("Processing WOL Requests.")
 
-		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
+		handle, err := pcap.OpenLive(interfaceName, 1600, promiscuous, pcap.BlockForever)
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -130,7 +127,7 @@ import (
 
 		// Wait for a signal to exit
 		<-doneChan
-		fmt.Println("Exiting...")
+		//fmt.Println("Exiting...")
 		removePIDFile(pidFile)
 		logger.Println("Stopping WOL Daemon.")
 		// Close down.
@@ -184,7 +181,6 @@ import (
 				go runcmd(mac)
 	
 			case sig := <-signalChan:
-				fmt.Printf("Received signal: %v\n", sig)
 				doneChan <- true
 				return nil
 			}
