@@ -30,6 +30,8 @@ import (
 		"github.com/urfave/cli/v2"
 	)
 
+// Copyright (c) [Year] [Your Name]
+
 	var logger *log.Logger
 	
 	func main() {
@@ -58,7 +60,7 @@ import (
 			Action: func(c *cli.Context) error {
 				// Check if the version flag is set
 				if c.Bool("version") {
-					fmt.Printf("unraidwold version %s\n", app.Version)
+					fmt.Printf("unraidwold version Vers\n")
 					return nil
 				}
 	
@@ -69,7 +71,7 @@ import (
 	
 				// Check if promiscuous mode is enabled
 				if c.Bool("promiscuous") {
-					logger.Info("Promiscuous mode is enabled")
+					logger.Println("Promiscuous mode is enabled")
 					// Additional actions for promiscuous mode can be added here
 				}
 	
