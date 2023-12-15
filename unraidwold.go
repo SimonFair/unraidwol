@@ -21,8 +21,8 @@ import (
 		"log/syslog"
 		"os"
 		"os/exec"
-		//"os/signal"
-		//"syscall"
+		"os/signal"
+		"syscall"
 	
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
@@ -122,7 +122,15 @@ import (
 		}
 		defer handle.Close()
 
-		processPackets(handle)
+		signalChan := make(chan os.Signal, 1)
+		doneChan := make(chan bool, 1)
+		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
+		go processPackets(handle, signalChan, doneChan)
+
+		// Wait for a signal to exit
+		<-doneChan
+		fmt.Println("Exiting...")
 		// Close down.
 	}
 
