@@ -131,6 +131,8 @@ import (
 		// Wait for a signal to exit
 		<-doneChan
 		fmt.Println("Exiting...")
+		removePIDFile(pidFile)
+		logger.Println("Stopping WOL Daemon.")
 		// Close down.
 		//os.Exit(1)
 		return
