@@ -132,6 +132,7 @@ import (
 		<-doneChan
 		fmt.Println("Exiting...")
 		// Close down.
+		os.Exit(1)
 	}
 
 	func writePIDFile(pidFile string) error {
