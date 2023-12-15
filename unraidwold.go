@@ -132,8 +132,8 @@ import (
 		removePIDFile(pidFile)
 		logger.Println("Stopping WOL Daemon.")
 		// Close down.
-		//os.Exit(1)
-		return
+		os.Exit(1)
+		//return
 	}
 
 	func writePIDFile(pidFile string) error {
