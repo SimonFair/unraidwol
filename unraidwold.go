@@ -141,7 +141,8 @@ import (
 	
 	
 	func processPackets(handle *pcap.Handle) error {
-		
+		var mac string
+	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
 		for packet := range source.Packets() {
 			ethLayer := packet.Layer(layers.LayerTypeEthernet)
@@ -163,7 +164,7 @@ import (
 					appPacket := packet.ApplicationLayer()
 					if appPacket != nil {
 						payload := appPacket.Payload()
-						mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
+						mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
 					}
 					//mac, err = GrabMACAddrUDP(packet)
 					//if (err != nil) {
