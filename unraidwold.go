@@ -73,14 +73,9 @@ import (
 		}
 	
 				return runRegular(c.String("interface"))
-			},
-		}
-	
-		err := app.Run(os.Args)
-		if err != nil {
-			logger.Fatal(err)
-		}
+			
 	}
+
 
 
 	func setupLogging(logFile string) {
