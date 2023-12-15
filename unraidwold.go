@@ -62,6 +62,13 @@ import (
 			flag.PrintDefaults()
 			os.Exit(1)
 		}
+
+		deviceError := deviceExists(interfaceName)
+		if deviceError {
+			flag.PrintDefaults()
+			os.Exit(1)
+		}
+
 	
 		// Set up logging
 		setupLogging(logFile)
