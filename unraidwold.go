@@ -32,11 +32,10 @@ import (
 
 	var logger *log.Logger
 	var logOutput io.Writer
-	var file os.File
+	var file string
 	var logFile string
 	
 	func main() {
-		defer cleanUp()
 		app := &cli.App{
 			Name:  "unraidwold",
 			Usage: "Capture and process WOL Network packages",
@@ -71,7 +70,7 @@ import (
 		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
-			file, err = os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -94,11 +93,7 @@ import (
 
 	}
 	
-	func cleanup() {
-
-			file.Close()
-
-	}
+	
 	func runRegular(interfaceName string) error {
 
 
