@@ -35,6 +35,7 @@ import (
 	var logger *log.Logger
 	
 	func main() {
+		var logOutput io.Writer
 		var (
 			appVersion   bool
 			interfaceName string
@@ -65,32 +66,18 @@ import (
 
 		deviceError := deviceExists(interfaceName)
 		if (! deviceError) {
+			fmt.Println("Error: The --interface network address is not valid")
 			flag.PrintDefaults()
 			os.Exit(1)
 		}
 
 	
 		// Set up logging
-		setupLogging(logFile)
-	
-		// Check if promiscuous mode is enabled
-		if promiscuous {
-			fmt.Println("Promiscuous mode is enabled")
-			// Additional actions for promiscuous mode can be added here
-		}
-	
-		runRegular(interfaceName)
-			
-	}
-
-
-
-	func setupLogging(logFile string) {
-		var logOutput io.Writer
-	
+		
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
 			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			defer file.Close()
 			if err != nil {
 				logger.Fatal(err)
 			}
@@ -98,7 +85,7 @@ import (
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
 			// If no log file is specified, log to syslog
-			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "PacketDaemon")
+			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "Unraidwold")
 			if err != nil {
 				logger.Fatal(err)
 			}
@@ -107,13 +94,13 @@ import (
 	
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
-	}
 	
+		// Check if promiscuous mode is enabled
+		if promiscuous {
+			fmt.Println("Promiscuous mode is enabled")
+			// Additional actions for promiscuous mode can be added here
+		}
 	
-	
-	func runRegular(interfaceName string) error {
-
-
 		var filter = "ether proto 0x0842 or udp port 9" 
 
 		// Create a PID file
@@ -134,12 +121,10 @@ import (
 			log.Fatalf("Something in the BPF went wrong!: %v", err)
 		}
 		defer handle.Close()
-	
+
 		return processPackets(handle)
-
-
+		// Close down.
 	}
-	
 
 	func writePIDFile(pidFile string) error {
 		pid := os.Getpid()
@@ -185,8 +170,6 @@ import (
 				}
 			}
 			runcmd(mac)
-		
-		
 		}
 		return nil
 
