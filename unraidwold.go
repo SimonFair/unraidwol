@@ -34,8 +34,9 @@ import (
 	
 	func main() {
 		app := &cli.App{
-			Name:  "unraidwold",
-			Usage: "Capture and process WOL Network packages",
+			Name:    "unraidwold",
+			Usage:   "Capture and process WOL Network packages",
+			Version: "1.0.0",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "interface",
@@ -45,13 +46,33 @@ import (
 					Name:  "log",
 					Usage: "Log file path",
 				},
+				&cli.BoolFlag{
+					Name:  "promiscuous",
+					Usage: "Enable promiscuous mode",
+				},
+				&cli.BoolFlag{
+					Name:  "version",
+					Usage: "Print the version",
+				},
 			},
 			Action: func(c *cli.Context) error {
+				// Check if the version flag is set
+				if c.Bool("version") {
+					fmt.Printf("unraidwold version %s\n", app.Version)
+					return nil
+				}
+	
 				// Set up logging
 				logFile := c.String("log")
-				
+	
 				setupLogging(logFile)
-				
+	
+				// Check if promiscuous mode is enabled
+				if c.Bool("promiscuous") {
+					logger.Info("Promiscuous mode is enabled")
+					// Additional actions for promiscuous mode can be added here
+				}
+	
 				return runRegular(c.String("interface"))
 			},
 		}
