@@ -27,7 +27,7 @@ import (
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
 		"github.com/google/gopacket/layers"
-		"github.com/urfave/cli/v2"
+		//"github.com/urfave/cli/v2"
 	)
 
 // Copyright (c) [Year] [Your Name]
@@ -35,45 +35,42 @@ import (
 	var logger *log.Logger
 	
 	func main() {
-		app := &cli.App{
-			Name:    "unraidwold",
-			Usage:   "Capture and process WOL Network packages",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:  "interface",
-					Usage: "Network interface name",
-					Required: true,
-				},
-				&cli.StringFlag{
-					Name:  "log",
-					Usage: "Log file path",
-				},
-				&cli.BoolFlag{
-					Name:  "promiscuous",
-					Usage: "Enable promiscuous mode",
-				},
-			//	&cli.BoolFlag{
-			//		Name:  "version",
-			//		Usage: "Print the version",
-			//	},
-			},
-			Action: func(c *cli.Context) error {
-				// Check if the version flag is set
-				if c.Bool("version") {
-					fmt.Printf("unraidwold version Vers\n")
-					return nil
-				}
+		var (
+			appVersion   bool
+			interfaceName string
+			logFile      string
+			promiscuous  bool
+		)
 	
-				// Set up logging
-				logFile := c.String("log")
+		flag.BoolVar(&appVersion, "version", false, "Print the version and copyright information")
+		flag.StringVar(&interfaceName, "interface", "", "Network interface name (required)")
+		flag.StringVar(&logFile, "log", "", "Log file path")
+		flag.BoolVar(&promiscuous, "promiscuous", false, "Enable promiscuous mode")
 	
-				setupLogging(logFile)
+		flag.Parse()
 	
-				// Check if promiscuous mode is enabled
-				if c.Bool("promiscuous") {
-					logger.Println("Promiscuous mode is enabled")
-					// Additional actions for promiscuous mode can be added here
-				}
+		// Check if the version flag is set
+		if appVersion {
+			fmt.Println("unraidwold version 1.0.0")
+			fmt.Println("Copyright (c) [Year] [Your Name]")
+			return
+		}
+	
+		// Check if the required --interface flag is provided
+		if interfaceName == "" {
+			fmt.Println("Error: The --interface flag is required")
+			flag.PrintDefaults()
+			os.Exit(1)
+		}
+	
+		// Set up logging
+		setupLogging(logFile)
+	
+		// Check if promiscuous mode is enabled
+		if promiscuous {
+			fmt.Println("Promiscuous mode is enabled")
+			// Additional actions for promiscuous mode can be added here
+		}
 	
 				return runRegular(c.String("interface"))
 			},
