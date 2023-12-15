@@ -31,9 +31,6 @@ import (
 	)
 
 	var logger *log.Logger
-	var logOutput io.Writer
-	var file os.File
-	var logFile string
 	
 	func main() {
 		app := &cli.App{
@@ -51,10 +48,10 @@ import (
 			},
 			Action: func(c *cli.Context) error {
 				// Set up logging
-				logFile = c.String("log")
+				logFile := c.String("log")
 				
-				setupLogging()
-	
+				setupLogging(logFile)
+				
 				return runRegular(c.String("interface"))
 			},
 		}
@@ -65,32 +62,26 @@ import (
 		}
 	}
 
-	func setupLogging() {
+	func setupLogging(logfile) {
 	var err error 
-		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
-			file, err = os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				fmt.Println(err)
 			}
-			
-
-			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
+			logOutput := io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
 			// If no log file is specified, log to syslog
 			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "UNraidwold")
 			if err != nil {
 				logger.Fatal(err)
 			}
-			logOutput = syslogWriter
+			logOutput := syslogWriter
 		}
 	
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
-	
-
-
 	}
 	
 	
