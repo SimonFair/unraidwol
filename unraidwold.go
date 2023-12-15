@@ -1,13 +1,13 @@
+// Copyright (c) 2021, Scott Ellis
+// All rights reserved.
+// Copyright (c) 2023 Limetech, Simon Fairweather.
 //
-// Virtual Wake-on-LAN
+// Unraid Wake-on-LAN(V1.0.0)
 //
-// Listens for a WOL magic packet (UDP), then connects to the local libvirt socket and finds a matching VM
-// If a matching VM is found, it is started (if not already running)
+// Listens for a WOL magic packet (UDP) and ether frame type 0x0842
+// If a matching VM/Docker or LXC is found, it is started (if not already running) and resumed if paused
 //
-// Assumes the VM has a static MAC configured
-// Assumes libvirtd connection is at /var/run/libvirt/libvirt-sock
-//
-// Filters on len=102 and len=144 (WOL packet) and len=234 (WOL packet with password)
+// Filters on ether proto 0x0842 or udp port 9
 
 package main
 
@@ -27,10 +27,8 @@ import (
 		"github.com/google/gopacket"
 		"github.com/google/gopacket/pcap"
 		"github.com/google/gopacket/layers"
-		//"github.com/urfave/cli/v2"
+	
 	)
-
-// Copyright (c) [Year] [Your Name]
 
 	var logger *log.Logger
 	
@@ -49,11 +47,17 @@ import (
 		flag.BoolVar(&promiscuous, "promiscuous", false, "Enable promiscuous mode")
 	
 		flag.Parse()
+
+		versionInfo := "Unraid Wake-on-LAN(V1.0.0)
+		Copyright (c) 2021, Scott Ellis
+		All rights reserved.
+		Copyright (c) 2023 Limetech, Simon Fairweather."
+		
 	
 		// Check if the version flag is set
 		if appVersion {
-			fmt.Println("unraidwold version 1.0.0")
-			fmt.Println("Copyright (c) [Year] [Your Name]")
+			fmt.Println(versionInfo)
+
 			return
 		}
 	
