@@ -33,6 +33,7 @@ import (
 	var logger *log.Logger
 	var logOutput io.Writer
 	var file string
+	var logFile string
 	
 	func main() {
 		app := &cli.App{
@@ -52,7 +53,7 @@ import (
 				// Set up logging
 				logFile = c.String("log")
 				
-				setupLogging(logFile)
+				setupLogging()
 	
 				return runRegular(c.String("interface"))
 			},
@@ -64,7 +65,7 @@ import (
 		}
 	}
 
-	func setupLogging(logFile string) {
+	func setupLogging() {
 	
 		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
