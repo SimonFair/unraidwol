@@ -148,7 +148,7 @@ import (
 	}
 	
 	
-	func processPackets(handle *pcap.Handle) error {
+	func processPackets(handle *pcap.Handle, signalChan chan os.Signal, doneChan chan bool) error {
 		var mac string
 	
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
