@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	github.com/google/gopacket v1.1.19
+	github.com/google/gopacket/pcap  v1.1.19
+	github.com/google/gopacket/layers  v1.1.19
 )
 
 require (

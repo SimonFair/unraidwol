@@ -48,12 +48,11 @@ import (
 	
 		flag.Parse()
 
-		versionInfo := "Unraid Wake-on-LAN(V1.0.0)\nCopyright (c) 2021, Scott Ellis\nAll rights reserved.\nCopyright (c) 2023 Limetech, Simon Fairweather.\n"
+		versionInfo := "Unraid Wake-on-LAN (V1.0.0)\nCopyright (c) 2021, Scott Ellis\nAll rights reserved.\nCopyright (c) 2023 Limetech, Simon Fairweather.\n"
 	
 		// Check if the version flag is set
 		if appVersion {
 			fmt.Println(versionInfo)
-
 			return
 		}
 	
