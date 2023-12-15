@@ -38,7 +38,6 @@ import (
 		app := &cli.App{
 			Name:    "unraidwold",
 			Usage:   "Capture and process WOL Network packages",
-			Version: "1.0.0",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "interface",
@@ -52,10 +51,10 @@ import (
 					Name:  "promiscuous",
 					Usage: "Enable promiscuous mode",
 				},
-				&cli.BoolFlag{
-					Name:  "version",
-					Usage: "Print the version",
-				},
+			//	&cli.BoolFlag{
+			//		Name:  "version",
+			//		Usage: "Print the version",
+			//	},
 			},
 			Action: func(c *cli.Context) error {
 				// Check if the version flag is set
