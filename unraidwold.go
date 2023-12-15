@@ -72,7 +72,7 @@ import (
 			// Additional actions for promiscuous mode can be added here
 		}
 	
-				return runRegular(c.String("interface"))
+		runRegular(interfaceName)
 			
 	}
 
