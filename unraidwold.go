@@ -32,7 +32,7 @@ import (
 
 	var logger *log.Logger
 	var logOutput io.Writer
-	var file string
+	var file os.File
 	var logFile string
 	
 	func main() {
