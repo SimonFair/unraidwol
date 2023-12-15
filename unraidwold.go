@@ -107,7 +107,7 @@ import (
 		pidFile := "/var/run/unraidwold.pid" // Change the path as needed
 		err := writePIDFile(pidFile)
 		if err != nil {
-			return err
+			logger.Fatal(err)
 		}
 		defer removePIDFile(pidFile)
 		fmt.Printf("Starting")
@@ -115,14 +115,14 @@ import (
 
 		handle, err := pcap.OpenLive(interfaceName, 1600, false, pcap.BlockForever)
 		if err != nil {
-			return err
+			logger.Fatal(err)
 		}
 		if err := handle.SetBPFFilter(filter); err != nil {
 			log.Fatalf("Something in the BPF went wrong!: %v", err)
 		}
 		defer handle.Close()
 
-		return processPackets(handle)
+		processPackets(handle)
 		// Close down.
 	}
 
