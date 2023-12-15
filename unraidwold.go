@@ -153,7 +153,7 @@ import (
 			if ethLayer != nil {
 				ethernetPacket, _ := ethLayer.(*layers.Ethernet)
 				if ethernetPacket.EthernetType == 0x0842 {
-					logger.Println("Wake-on-LAN packet")
+					//logger.Println("Wake-on-LAN packet")
 					payload := ethernetPacket.Payload
 					mac = fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[6], payload[7], payload[8], payload[9], payload[10], payload[11])
 				}
@@ -162,11 +162,16 @@ import (
 			if udpLayer != nil {
 				udpPacket, _ := udpLayer.(*layers.UDP)
 				if udpPacket.DstPort == layers.UDPPort(9) {
-					fmt.Println("UDP port 9 packet")
-					mac, err = GrabMACAddrUDP(packet)
-					if (err != nil) {
-						fmt.Printf("Error")
+					//fmt.Println("UDP port 9 packet")
+					appPacket := packet.ApplicationLayer()
+					if appPactet != nil {
+						payload := app.Payload()
+						mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
 					}
+					//mac, err = GrabMACAddrUDP(packet)
+					//if (err != nil) {
+					//	fmt.Printf("Error")
+					//}
 				}
 			}
 			runcmd(mac)
@@ -205,8 +210,7 @@ func GrabMACAddrUDP(packet gopacket.Packet) (string, error) {
 // Check if the network device exists
 func deviceExists(interfacename string) bool {
 	if interfacename == "" {
-		fmt.Printf("No interface to listen on specified\n\n")
-		flag.PrintDefaults()
+		fmt.Printf("No valid interface to listen on specified\n\n")
 		return false
 	}
 	devices, err := pcap.FindAllDevs()
