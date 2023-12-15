@@ -71,7 +71,7 @@ import (
 		fmt.Println("Log file is %s",logFile)
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
-			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			file, err = os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -95,9 +95,9 @@ import (
 	}
 	
 	func cleanup() {
-		if file != nil {
+
 			file.Close()
-		}
+
 	}
 	func runRegular(interfaceName string) error {
 
