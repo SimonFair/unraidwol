@@ -62,27 +62,31 @@ import (
 		}
 	}
 
-	func setupLogging(logfile) {
-	var err error 
+
+	func setupLogging(logFile string) {
+		var logOutput io.Writer
+	
 		if logFile != "" {
 			// If a log file is specified, create or append to the file
 			file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
-				fmt.Println(err)
+				logger.Fatal(err)
 			}
-			logOutput := io.MultiWriter(file, os.Stdout) // Log to both file and stdout
+			//defer file.Close()
+			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
 			// If no log file is specified, log to syslog
-			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "UNraidwold")
+			syslogWriter, err := syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, "PacketDaemon")
 			if err != nil {
 				logger.Fatal(err)
 			}
-			logOutput := syslogWriter
+			logOutput = syslogWriter
 		}
 	
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
 	}
+	
 	
 	
 	func runRegular(interfaceName string) error {
