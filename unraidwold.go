@@ -141,10 +141,7 @@ import (
 	
 	
 	func processPackets(handle *pcap.Handle) error {
-		var mac string
-		var err error
-
-	
+		
 		source := gopacket.NewPacketSource(handle, handle.LinkType())
 		for packet := range source.Packets() {
 			ethLayer := packet.Layer(layers.LayerTypeEthernet)
