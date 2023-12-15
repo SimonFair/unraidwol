@@ -164,8 +164,8 @@ import (
 				if udpPacket.DstPort == layers.UDPPort(9) {
 					//fmt.Println("UDP port 9 packet")
 					appPacket := packet.ApplicationLayer()
-					if appPactet != nil {
-						payload := app.Payload()
+					if appPacket != nil {
+						payload := appPacket.Payload()
 						mac := fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", payload[12], payload[13], payload[14], payload[15], payload[16], payload[17])
 					}
 					//mac, err = GrabMACAddrUDP(packet)
