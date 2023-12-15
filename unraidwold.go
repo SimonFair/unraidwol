@@ -32,10 +32,11 @@ import (
 
 	var logger *log.Logger
 	var logOutput io.Writer
-	var file string
+	var file os.File
 	var logFile string
 	
 	func main() {
+		defer cleanUp()
 		app := &cli.App{
 			Name:  "unraidwold",
 			Usage: "Capture and process WOL Network packages",
@@ -74,7 +75,7 @@ import (
 			if err != nil {
 				fmt.Println(err)
 			}
-			defer file.Close()
+			
 
 			logOutput = io.MultiWriter(file, os.Stdout) // Log to both file and stdout
 		} else {
@@ -93,7 +94,11 @@ import (
 
 	}
 	
-	
+	func cleanup() {
+		if file != nil {
+			file.Close()
+		}
+	}
 	func runRegular(interfaceName string) error {
 
 
