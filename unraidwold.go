@@ -95,11 +95,7 @@ import (
 		// Create a logger that writes to the specified output
 		logger = log.New(logOutput, "", log.LstdFlags)
 	
-		// Check if promiscuous mode is enabled
-		if promiscuous {
-			logger.Println("Promiscuous mode is enabled")
-		}
-	
+
 		var filter = "ether proto 0x0842 or udp port 9" 
 
 		// Create a PID file
@@ -109,6 +105,11 @@ import (
 			logger.Fatal(err)
 		}
 		logger.Println("Processing WOL Requests.")
+				// Check if promiscuous mode is enabled
+				if promiscuous {
+					logger.Println("Promiscuous mode is enabled")
+				}
+			
 
 		handle, err := pcap.OpenLive(interfaceName, 1600, promiscuous, pcap.BlockForever)
 		if err != nil {
